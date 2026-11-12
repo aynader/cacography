@@ -1,0 +1,37 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+% Small writing features: words crossed out and rewritten, margin notes on both sides,
+% underlines and a boxed result.
+% Build:  bin\cacography.cmd writing-features
+\documentclass{article}
+\usepackage[
+  paper=notebook,
+  ink=blue,
+  seed=321,
+  background=oak,
+  light=window,
+  framing=tight,
+  props=none,
+  underline=headings,
+  crumple=none, folds=none, stains=none, backside=none,
+]{cacography}
+\usepackage{amsmath}
+
+\begin{document}
+\section{Ideal gas}
+The pressure of an \crossout{real} ideal gas rises with temperature at fixed
+volume.\cacographynote*[right]{check units!} For one mole we have
+\begin{equation}
+  pV = \crossout[scribble]{nT} RT,
+\end{equation}
+where $R$ is the \crossout[double]{Boltzmann} gas constant. Doubling the
+temperature \crossout[line]{halves} doubles the pressure.\cacographynote*{see lecture 3}
+
+\section{Work done}
+Expanding \underline{slowly} at constant temperature, the gas does the work
+\[
+  \boxed{W = nRT \ln\frac{V_2}{V_1}}
+\]
+which is \crossout[scribble]{negative} positive when the gas expands.\cacographynote[right]{sign!}
+Note that \crossout{heat and work are the same} heat flows in to keep $T$ fixed.
+\end{document}

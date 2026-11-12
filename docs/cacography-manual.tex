@@ -1,0 +1,201 @@
+% The cacography manual. Build with:  lualatex cacography-manual  (twice)
+\documentclass[11pt]{article}
+\usepackage[a4paper, margin=2.4cm]{geometry}
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+\setmainfont{Latin Modern Roman}
+\setmonofont{Latin Modern Mono}[Scale=0.95]
+\lstset{basicstyle=\ttfamily\small, columns=fullflexible, frame=single, framesep=4pt, rulecolor=\color{black!25}, breaklines}
+\newcommand{\opt}[1]{\texttt{#1}}
+\newcommand{\cs}[1]{\texttt{\textbackslash #1}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+
+\title{\textbf{cacography}\\[0.3em]\large Typeset a document, get photographed handwritten notes back\\[0.2em]\normalsize Version 0.14 (beta)}
+\author{}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\includegraphics[width=0.31\linewidth]{img/writing-features.jpg}\hfill
+\includegraphics[width=0.31\linewidth]{img/graph-demo3.jpg}\hfill
+\includegraphics[width=0.31\linewidth]{img/qm-handled.jpg}
+\end{center}
+
+\section{What it does}
+LaTeX still does the layout, the equations and the structure. A handwriting model trained on
+real pen recordings then writes every page, on procedurally made paper, which is photographed
+as a phone would: on a desk or on cloth, in a room's light, perhaps with a pen lying beside
+it. The PDF keeps the typeset text invisibly under each photo, so it stays searchable and
+copyable. Version 1.0 covers English and German.
+
+\textbf{Licence.} The LaTeX package is under the LPPL 1.3c, the renderer under the MIT
+licence. The handwriting models are a separate download for non-commercial research only:
+they are trained on datasets (BRUSH, IAM-OnDB, MathWriting) whose terms allow only that.
+
+\section{Installing}
+You need Lua\LaTeX\ (TeX Live or MiKTeX). Then, from a download of the repository:
+\begin{lstlisting}
+.\install.ps1          % Windows
+sh install.sh          % macOS, Linux
+\end{lstlisting}
+The installer uses \texttt{uv}, which brings its own Python. It installs the renderer
+(PyTorch, and Mitsuba~3 for photos traced in 3D), runs \texttt{cacography setup} to put the
+LaTeX package where TeX finds it and fetch the models, then checks everything with
+\texttt{cacography doctor}. By hand:
+\begin{lstlisting}
+pip install cacography
+cacography setup       % LaTeX files, models, and how LuaLaTeX starts the renderer
+cacography doctor      % what is missing, and how to fix it
+\end{lstlisting}
+\begin{itemize}
+\item \textbf{The LaTeX package}: \texttt{cacography.sty} and \texttt{cacography.lua}. If
+  your TeX distribution already has them (from CTAN), \texttt{setup} leaves them alone.
+\item \textbf{3D photos} (props, cloth, real light) need an NVIDIA GPU. Without one, pages
+  are photographed with formulas, with no props and simpler light.
+\item \textbf{The handwriting models} go into the cache folder's \texttt{models/}
+  (\texttt{\%LOCALAPPDATA\%\textbackslash cacography} on Windows,
+  \texttt{\textasciitilde/.cache/cacography} elsewhere), or wherever \texttt{CACOGRAPHY\_MODELS}
+  points. \texttt{cacography setup --models <zip>} installs a downloaded copy.
+\item Textures and room lights (CC0, from Poly Haven and ambientCG) are downloaded once on
+  first use into the same cache folder. Offline, or with \texttt{CACOGRAPHY\_OFFLINE} set,
+  procedural stand-ins are used.
+\end{itemize}
+
+\section{Building a document}
+Load the package, with any options:
+\begin{lstlisting}
+\usepackage[paper=notebook, ink=blue, sloppiness=0.5, seed=123]{cacography}
+\end{lstlisting}
+\textbf{From the command line}, \texttt{cacography notes.tex} lays the document out, writes
+every page by hand and puts the photos in \texttt{notes.pdf}. Options after the file name go
+to the renderer: \texttt{cacography notes.tex --device cuda}.
+
+\textbf{In an editor} (TeXstudio, TeXworks, Texmaker, VS Code, \dots), compile with
+Lua\LaTeX\ and shell escape turned on. The first run lays the document out and draws the
+pages itself; the second puts them in, as with references. In TeXstudio, put these two lines
+at the top of the file (it asks once whether to allow them):
+\begin{lstlisting}
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+\end{lstlisting}
+With latexmk (and so VS Code's LaTeX Workshop), copy \texttt{.latexmkrc} from the repository
+next to the document: it turns shell escape on and runs Lua\LaTeX\ again by itself. Without
+shell escape the PDF shows the typeset text, and the log says what to run. The package option
+\opt{render=manual} never starts the renderer.
+
+\textbf{By hand}, the three steps are:
+\begin{lstlisting}
+lualatex notes             % lays out, records each page in notes.cacography/
+cacography render notes    % writes and photographs each page
+lualatex notes             % puts the photos in notes.pdf
+\end{lstlisting}
+Only pages whose layout or settings changed are drawn again, and written words are cached.
+The same seed gives the same pages on the CPU (the default); \texttt{--device cuda} is much
+faster but not bit-for-bit reproducible. \texttt{--all} redraws every page; \texttt{--flat}
+photographs with formulas even when a GPU is there.
+
+\section{Options}
+Every option can be given to \cs{usepackage}. Those marked \emph{per page} can also be set
+for one sheet with \cs{cacographypage}\{\dots\} (Section~\ref{sec:commands}). Anything about
+the photo left \opt{random} is chosen from the seed, each part with its own seed, so changing
+one never reshuffles another.
+
+\subsection*{The writing and the sheet}
+\begin{tabular}{@{}p{0.17\linewidth}p{0.78\linewidth}@{}}
+\toprule
+\opt{paper} & \opt{notebook} (college ruled, binder holes), \opt{wide}, \opt{legal} (yellow pad), \opt{graph} (5\,mm grid), \opt{blank}\\
+\opt{papersize} & \opt{letter} (default), \opt{a4}, \dots\\
+\opt{ink} & \opt{blue}, \opt{black}, \opt{red} (ballpoint), \opt{pencil}\\
+\opt{sloppiness} & 0 to 1: neat, even lines at 0; at 1, words that change size, tilt and wander off the line\\
+\opt{seed} & a number, or \opt{random} (the renderer prints the one it used)\\
+\opt{wear} & 0 to 1, how handled sheets are: makes crumples, folds, stains, props and the rest likelier\\
+\opt{underline} & \opt{headings} (section titles underlined by hand), \opt{none}, \opt{random}\\
+\opt{camera} & \opt{phone}, \opt{scan} (a flatbed scan), \opt{none} (just the paper)\\
+\opt{render} & \opt{auto} (with shell escape, Lua\LaTeX\ draws the pages itself), \opt{manual}\\
+\bottomrule
+\end{tabular}
+
+\subsection*{The photo}
+\begin{tabular}{@{}p{0.17\linewidth}p{0.78\linewidth}@{}}
+\toprule
+\opt{background} & what the sheet lies on: wood (\opt{oak}, \opt{walnut}, \opt{birch}, \opt{pine}, \opt{cherry}, \opt{worn}, \opt{painted}, \opt{plywood}); plain (\opt{laminate}, \opt{white}, \opt{black}, \opt{glass}); stone (\opt{marble}, \opt{terrazzo}, \opt{concrete}); fabric (\opt{blanket}, \opt{bedsheet}, \opt{linen}, \opt{canvas}, \opt{twill}, \opt{denim}, \opt{knit}, \opt{towel}, \opt{corduroy}, \opt{velvet}, \opt{stripes}, \opt{plaid}, \opt{gingham}, \opt{dots}, \opt{print}, \opt{grid}); pad (\opt{leather}, \opt{cork}, \opt{felt}, \opt{carpet}, \opt{jute}); a group's name (\opt{wood}, \opt{fabric}, \opt{patterned}, \dots) for one of the group; or \opt{file:}\emph{path} for your own photo of a surface\\
+\opt{light} & \opt{lamp}, \opt{overhead}, \opt{window}, \opt{soft}, \opt{raking} (low, showing every crease), \opt{flash}, \opt{dim}\\
+\opt{angle} \emph{(per page)} & \opt{flat}, \opt{slight}, \opt{steep}, or a tilt in degrees\\
+\opt{framing} \emph{(per page)} & \opt{tight}, \opt{loose} (more of the room), \opt{cropped} (part of the sheet cut off)\\
+\opt{shadow} \emph{(per page)} & \opt{none}, \opt{phone} (the phone and hand shading the page)\\
+\opt{props} \emph{(per page)} & \opt{none}, or any of \opt{tape}, \opt{clip}, \opt{binder}, \opt{staple}, \opt{pen}, \opt{sheet}: \opt{props=\{tape, pen\}}. A pen comes in many kinds, shaped after real ones (clear barrels showing the refill, gel pens with dimpled or ringed grips, soft-grip twist pens, click pens, capped pens with the cap on the point or posted), with real clips standing off the barrel and printing on it; with \opt{ink=pencil} it is a sharpened wooden pencil (some with a worn eraser) or a mechanical one, sometimes with a case of leads. Only in 3D photos.\\
+\bottomrule
+\end{tabular}
+
+\subsection*{How the sheet has been handled \emph{(all per page)}}
+\begin{tabular}{@{}p{0.17\linewidth}p{0.78\linewidth}@{}}
+\toprule
+\opt{crumple} & \opt{none}, or 0 to 1: crumpled and smoothed out again\\
+\opt{folds} & \opt{none}, \opt{half}, \opt{thirds}, \opt{quarters}\\
+\opt{creases}, \opt{scores} & \opt{none}, or how many\\
+\opt{edges} & \opt{clean}, \opt{worn}, \opt{torn}, \opt{spiral} (torn from a spiral notebook)\\
+\opt{stains} & \opt{none}, \opt{coffee}, \opt{water}, \opt{smudge}, or several: \opt{stains=\{coffee, smudge\}}\\
+\opt{grooves} & \opt{none}, or 0 to 1: the pen's strokes pressed into the paper\\
+\opt{backside} & \opt{writing} (the back is written on and shows through), \opt{none}\\
+\opt{curl} & \opt{none}, or 0 to 1: edges or corners rolling up\\
+\opt{age} & \opt{none}, or 0 to 1: yellowed, foxed, the ink faded\\
+\bottomrule
+\end{tabular}
+
+\opt{reroll=\{angle, light=2\}} draws the named parts again, keeping everything else (the
+number picks a different new one).
+
+\section{Commands}\label{sec:commands}
+\begin{description}
+\item[\cs{cacographypage}\{\emph{options}\}] how this one sheet looks and is shot, e.g.\
+  \cs{cacographypage}\{crumple=0.8, stains=coffee, props=pen\}.
+\item[\cs{crossout}\{\emph{text}\}] writes the text and strikes it out by hand, as this
+  writer does: one wavering line, two lines, or a scribble. \cs{crossout}[line],
+  [double] or [scribble] choose. Write the right words after it:
+  \cs{crossout}\{halves\} doubles.
+\item[\cs{erased}\{\emph{old}\}\{\emph{new}\}] writes \emph{new} where \emph{old} was written
+  first and rubbed out: a faint ghost of the old word under it (and its grooves in the
+  paper), the paper a little grey and roughed up there, a few eraser crumbs nearby. The
+  words after it keep the old word's room. Made for \opt{ink=pencil}; on a well-used pencil
+  page (high \opt{wear}) a word is now and then rubbed out and rewritten on its own.
+\item[\cs{cacographynote}\{\emph{text}\}] a small note in the left margin beside its line;
+  \cs{cacographynote*} adds an arrow to the place it was written; \cs{cacographynote}[right]
+  puts it in the right margin.
+\item[\cs{reroll}\{\emph{words}\}] writes just these words again with a new seed;
+  \cs{reroll}[2], [3], \dots\ give further versions.
+\item[\cs{underline}, \cs{boxed}, \cs{fbox}] are drawn by hand, along the slope the words
+  were written at.
+\end{description}
+
+\section{Drawings}
+TikZ and pgfplots figures are drawn again by hand: every line and curve one pen stroke,
+arrow tips flicked on, dashes as separate dashes, labels in handwriting where TeX put them
+(turned ones turned). Plots are cut to their axes as pgfplots clips them; shaded areas are
+hatched, closer for a darker grey and crossed when very dark; pale grid lines are ruled thin;
+round plot marks are filled in with a small spiral. Included images (\cs{includegraphics})
+are not redrawn.
+
+\section{Good to know}
+\begin{itemize}
+\item TeX lays the text out with handwriting proportions (letters 10\% wider, word gaps 2.3
+  times wider), so lines break where a hand would; handwriting that still runs long moves a
+  line down rather than overlapping.
+\item One document is shot in one room: desk, lamp and phone stay the same on every page,
+  while each sheet lies, is handled and is framed in its own way.
+\item A word written badly can be fixed alone with \cs{reroll}; nothing else on the page changes.
+\item The renderer needs \texttt{latinmodern-math.otf} from your TeX distribution.
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=\linewidth]{img/fabrics.jpg}\\[0.3em]
+\small Some of the cloth backgrounds, woven thread by thread.
+\end{center}
+
+\end{document}

@@ -1,0 +1,182 @@
+% cacography: typeset a LaTeX document, get photographed handwritten notes back.
+%
+% The first LuaLaTeX run lays the document out with handwriting proportions and
+% records every page as a scene file. `cacography render <jobname>` writes each page
+% by hand. The next LuaLaTeX run puts those pages in the PDF, keeping the typeset text
+% invisible underneath so search, copy and links still work.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cacography}[2026/11/09 v0.14.0b1 Handwritten notes from LaTeX]
+
+\RequirePackage{iftex}
+\RequirePackage{etoolbox}
+\ifluatex\else
+  \PackageError{cacography}{cacography needs LuaLaTeX}{Compile this document with lualatex.}
+\fi
+
+\DeclareKeys[cacography]{
+  seed.store        = \cacography@seed,
+  paper.store       = \cacography@paper,
+  papersize.store   = \cacography@papersize,
+  handwriting.store = \cacography@handwriting,
+  ink.store         = \cacography@ink,
+  sloppiness.store  = \cacography@sloppiness,
+  camera.store      = \cacography@camera,
+  wear.store        = \cacography@wear,
+  background.store  = \cacography@background,
+  light.store       = \cacography@light,
+  angle.store       = \cacography@angle,
+  shadow.store      = \cacography@shadow,
+  crumple.store     = \cacography@crumple,
+  folds.store       = \cacography@folds,
+  creases.store     = \cacography@creases,
+  scores.store      = \cacography@scores,
+  edges.store       = \cacography@edges,
+  stains.store      = \cacography@stains,
+  grooves.store     = \cacography@grooves,
+  backside.store    = \cacography@backside,
+  curl.store        = \cacography@curl,
+  age.store         = \cacography@age,
+  props.store       = \cacography@props,
+  framing.store     = \cacography@framing,
+  underline.store   = \cacography@underline,
+  reroll.store      = \cacography@reroll,
+  render.store      = \cacography@render,
+}
+\SetKeys[cacography]{
+  seed = random, paper = notebook, papersize = letter, handwriting = natural,
+  ink = blue, sloppiness = 0.5, camera = phone, wear = 0.3,
+  % Each aspect of the photo on its own: set one, or reroll={angle, light=2} for new ones.
+  background = random, light = random, angle = random, shadow = random,
+  crumple = random, folds = random, creases = random, scores = random, edges = random,
+  stains = random, grooves = random, backside = random, curl = random, age = random, props = random, framing = random, underline = random, reroll = {},
+  % auto: with --shell-escape, LuaLaTeX draws the pages itself; manual: run `cacography render`.
+  render = auto,
+}
+\ProcessKeyOptions[cacography]
+
+\newattribute\cacography@variant
+\newattribute\cacography@crossout
+\newattribute\cacography@erased
+\newcount\cacography@erasedcount
+\directlua{
+  local path = kpse.find_file("cacography.lua", "lua") or kpse.find_file("cacography.lua", "tex")
+  cacography = dofile(path)
+}
+\directlua{cacography.setup{
+  jobname     = "\luaescapestring{\jobname}",
+  seed        = "\luaescapestring{\cacography@seed}",
+  paper       = "\luaescapestring{\cacography@paper}",
+  papersize   = "\luaescapestring{\cacography@papersize}",
+  handwriting = "\luaescapestring{\cacography@handwriting}",
+  ink         = "\luaescapestring{\cacography@ink}",
+  sloppiness  = "\luaescapestring{\cacography@sloppiness}",
+  camera      = "\luaescapestring{\cacography@camera}",
+  wear        = "\luaescapestring{\cacography@wear}",
+  background  = "\luaescapestring{\cacography@background}",
+  light       = "\luaescapestring{\cacography@light}",
+  angle       = "\luaescapestring{\cacography@angle}",
+  shadow      = "\luaescapestring{\cacography@shadow}",
+  crumple     = "\luaescapestring{\cacography@crumple}",
+  folds       = "\luaescapestring{\cacography@folds}",
+  creases     = "\luaescapestring{\cacography@creases}",
+  scores      = "\luaescapestring{\cacography@scores}",
+  edges       = "\luaescapestring{\cacography@edges}",
+  stains      = "\luaescapestring{\cacography@stains}",
+  grooves     = "\luaescapestring{\cacography@grooves}",
+  backside    = "\luaescapestring{\cacography@backside}",
+  curl        = "\luaescapestring{\cacography@curl}",
+  age         = "\luaescapestring{\cacography@age}",
+  props       = "\luaescapestring{\cacography@props}",
+  framing     = "\luaescapestring{\cacography@framing}",
+  underline   = "\luaescapestring{\cacography@underline}",
+  reroll      = "\luaescapestring{\cacography@reroll}",
+  render      = "\luaescapestring{\cacography@render}",
+}}
+\AtEndDocument{\directlua{cacography.finish()}}
+% Read on every run, rewritten when new pages are drawn: tells latexmk to run again.
+\input{\directlua{tex.sprint(cacography.status_file())}}
+
+\RequirePackage{geometry}
+\geometry{\cacography@papersize paper, left=1.4in, right=0.6in, top=1.3in, bottom=0.75in}
+
+% Handwriting is about 10% wider per letter than Latin Modern at the same x-height,
+% with word gaps 2.3 times as wide (measured on BRUSH and IAM-OnDB). Laying the text
+% out at those proportions makes TeX break lines where a hand would run out of room.
+\RequirePackage{fontspec}
+\RequirePackage{unicode-math}
+\setmainfont{Latin Modern Roman}[Scale=1.6, FakeStretch=1.10, WordSpace=2.3, Ligatures={TeX, CommonOff}]
+\setsansfont{Latin Modern Sans}[Scale=1.6, FakeStretch=1.10, WordSpace=2.3, Ligatures={TeX, CommonOff}]
+\setmonofont{Latin Modern Mono}[Scale=1.6]
+\setmathfont{Latin Modern Math}[Scale=1.6]
+\AtBeginDocument{%
+  \linespread{\fpeval{(\the\dimexpr\cacography@rulespacing\relax)/(\the\dimexpr\baselineskip\relax)}}\selectfont
+  \setlength{\parskip}{0pt}%
+  \raggedright
+  \setlength{\parindent}{1.5em}%
+}
+
+% \reroll{word} writes the words inside again with a different seed, leaving every other
+% word on the page as it was. \reroll[2]{word}, [3] and so on give further variants.
+\NewDocumentCommand\reroll{O{1}m}{{\cacography@variant=\numexpr#1\relax #2}}
+
+% \cacographynote{text} writes a small note in the left margin, beside the line it is
+% written on: between the binder holes and the margin line. \cacographynote*{text} also
+% draws an arrow from the note to the place in the text where it was written.
+% \cacographynote[right]{text} writes it in the right margin instead, narrower.
+\reversemarginpar
+\AtBeginDocument{\setlength{\marginparwidth}{0.68in}\setlength{\marginparsep}{0.17in}}
+\newcounter{cacography@note}
+\NewDocumentCommand\cacographynote{sO{left}m}{%
+  % A note at the start of a paragraph belongs to its first line, not the space above it.
+  \leavevmode
+  \begingroup
+  % LaTeX picks a margin for all notes at once, so a right-hand note is set in the left
+  % margin, narrower, and marked: the renderer writes it in the right margin.
+  \ifstrequal{#2}{right}{%
+    \setlength{\marginparwidth}{0.42in}%
+    \def\cacography@side{\directlua{cacography.note_mark(0, 3)}}%
+  }{\let\cacography@side\relax}%
+  \IfBooleanTF{#1}{%
+    \stepcounter{cacography@note}%
+    \directlua{cacography.note_mark(\arabic{cacography@note}, 1)}%
+    \marginpar{\raggedright\scriptsize\leavevmode\cacography@side\directlua{cacography.note_mark(\arabic{cacography@note}, 2)}#3}%
+  }{\marginpar{\raggedright\scriptsize\leavevmode\cacography@side #3}}%
+  \endgroup
+}
+
+% Drawings: pgf (TikZ, pgfplots) writes each drawing command through \pgfsys@invoke. A
+% readable copy goes beside it, so the renderer can draw the figure again by hand.
+\AtBeginDocument{%
+  \ifdefined\pgfsys@invoke
+    \let\cacography@pgfinvoke\pgfsys@invoke
+    \def\pgfsys@invoke#1{\cacography@pgfinvoke{#1}\directlua{cacography.literal("\luaescapestring{#1}")}}%
+  \fi
+}
+
+% \cacographypage{crumple=0.8, stains=coffee} sets how this one sheet looks and is shot:
+% angle, framing, shadow, wear, crumple, folds, creases, scores, edges, stains, grooves, backside, curl, age, props, or
+% reroll={...} of those. It applies to the page it lands on.
+\NewDocumentCommand\cacographypage{m}{\directlua{cacography.page_options("\luaescapestring{\detokenize{#1}}")}}
+
+% \crossout{text} writes the text and strikes it through by hand, the way this writer
+% crosses things out: one line, two, or a scribble. \crossout[line]{text},
+% \crossout[double]{...} and \crossout[scribble]{...} choose. Write the right word after it.
+\def\cacography@cross@{1}\def\cacography@cross@line{2}\def\cacography@cross@double{3}\def\cacography@cross@scribble{4}
+\NewDocumentCommand\crossout{O{}m}{%
+  \ifcsname cacography@cross@#1\endcsname
+    {\cacography@crossout=\csname cacography@cross@#1\endcsname\relax #2}%
+  \else
+    \PackageError{cacography}{Unknown crossout style `#1'}{Use line, double or scribble.}#2%
+  \fi
+}
+
+% \erased{old}{new} writes `new' where `old' was written first and rubbed out: a faint
+% ghost of the old word under it, the paper a little grey and roughed up there, and a few
+% crumbs of eraser about. Best with ink=pencil (an ink eraser leaves more behind).
+\NewDocumentCommand\erased{mm}{%
+  \global\advance\cacography@erasedcount by 1
+  \directlua{cacography.erased(\the\cacography@erasedcount, "\luaescapestring{\detokenize{#1}}")}%
+  {\cacography@erased=\cacography@erasedcount\relax #2}%
+}
+
+\endinput

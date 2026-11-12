@@ -1,0 +1,35 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+% Demo: linear algebra in pencil on graph paper, for comparing handwriting models.
+\documentclass{article}
+\usepackage[paper=graph, ink=pencil, sloppiness=0.55, seed=2024]{cacography}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section{Eigenvalues, a quick recap}
+A square matrix $A$ has an eigenvector $v$ when multiplying by it only stretches the
+vector, so that $Av = \lambda v$ for some number $\lambda$. Moving everything to one side
+gives a homogeneous system, and it has a nonzero solution only when
+\begin{equation}
+  \det(A - \lambda I) = 0 .
+\end{equation}
+This is the characteristic polynomial. For a two by two matrix it is a quadratic, so
+there are at most two eigenvalues, and they can be complex even when every entry of the
+matrix is real.
+
+\subsection{Things to remember for the exam}
+\begin{itemize}
+  \item The trace is the sum of the eigenvalues.
+  \item The determinant is their product.
+  \item A symmetric matrix has real eigenvalues and orthogonal eigenvectors.
+\end{itemize}
+If the eigenvectors span the whole space we can write $A = PDP^{-1}$, where the columns
+of $P$ are the eigenvectors and $D$ is diagonal. Powers then become easy, because
+\begin{equation}
+  A^k = P D^k P^{-1}
+\end{equation}
+and raising a diagonal matrix to a power only raises each entry. Ask the tutor on Friday
+why this fails for a shear, which has only one direction that stays fixed.
+
+\end{document}

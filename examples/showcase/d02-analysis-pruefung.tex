@@ -1,0 +1,25 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+\documentclass{article}
+\usepackage[paper=graph, ink=pencil, seed=902, background=walnut, light=lamp, sloppiness=0.27,angle=slight,wear=0.14]{cacography}
+\usepackage{amsmath}
+\begin{document}
+\cacographypage{stains=none,props={pen,clip},edges=spiral}
+\section{Ableitungen --- Probe}
+\cacographynote{Vorzeichen!}
+$f(x)=x^3-3x^2-9x+4$
+\begin{align*}
+f'(x)&=3x^2-6x-9\\
+&=3(x-3)(x+1),\\
+f''(x)&=6x-6.
+\end{align*}
+$\Rightarrow$ krit. Stellen $x=-1,3$.
+\begin{align*}
+f''(-1)&=-12<0\Rightarrow\text{Max.}\\
+f''(3)&=12>0\Rightarrow\text{Min.}
+\end{align*}
+\[
+\boxed{(-1,9)\quad\text{und}\quad(3,-23)}
+\]
+\crossout[double]{Nullstellen!} Extremstellen. Das wieder verwechseln? Nein.
+\end{document}

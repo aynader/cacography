@@ -1,0 +1,25 @@
+# The handwriting models are a separate, non-commercial download
+models/
+# Datasets carry their own terms and are never redistributed
+training/data/
+training/runs/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+
+# LaTeX build output (the showcase images in docs/img are kept)
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+examples/**/*.pdf
+*.cacography/
+docs/showcase-build/
+README-preview.html

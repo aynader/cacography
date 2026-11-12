@@ -1,0 +1,49 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+% The reference picture's notes, with what the paper overhaul added: a crumpled sheet,
+% a coffee stain, underlined headings, a margin note and hand-drawn arrows.
+% Build:  bin\cacography.cmd qm-handled
+\documentclass{article}
+\usepackage[
+  paper=notebook,
+  ink=blue,
+  sloppiness=0.5,
+  seed=123,
+  underline=headings,
+  background=walnut,
+  light=window,
+  framing=tight,
+  props=none,
+]{cacography}
+\usepackage{amsmath}
+
+\title{Quantum Mechanics (very messy notes)}
+\author{A. Student}
+\date{}
+
+\begin{document}
+\cacographypage{crumple=0.8, stains=coffee, edges=worn, backside=writing}
+\maketitle
+
+\section{Schr\"odinger Equation}
+The time-dependent Schr\"odinger equation\cacographynote*{maybe add time-indep. case here?} is
+\begin{equation}
+  i\hbar \frac{\partial}{\partial t}\psi(\mathbf{r},t)
+  = -\frac{\hbar^2}{2m}\nabla^2\psi(\mathbf{r},t) + V(\mathbf{r},t)\psi(\mathbf{r},t)
+\end{equation}
+For a stationary state we can write $\psi(\mathbf{r},t) = \phi(\mathbf{r})e^{-iEt/\hbar}$,
+which gives
+\begin{equation}
+  -\frac{\hbar^2}{2m}\nabla^2\phi(\mathbf{r}) + V(\mathbf{r})\phi(\mathbf{r}) = E\phi(\mathbf{r}).
+\end{equation}
+
+\section{Some remarks}
+Note:
+\begin{itemize}
+  \item $V(\mathbf{r})$ can be complicated.
+  \item Boundary conditions matter!
+  \item Check normalization: $\int |\psi|^2 \, d^3r = 1$.
+  \item Stationary $\Rightarrow$ $|\psi|^2$ does not change with time.
+\end{itemize}
+
+\end{document}

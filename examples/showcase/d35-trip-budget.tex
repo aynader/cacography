@@ -1,0 +1,20 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+\documentclass{article}
+\usepackage[paper=wide, ink=pencil, seed=935, background=carpet, light=overhead, sloppiness=.54,wear=.4,angle=steep]{cacography}
+\usepackage{amsmath}
+\begin{document}
+\cacographypage{stains=smudge,props={pen,clip},edges=spiral}
+\section{Weekend trip budget}
+Two people, shared room, no car.
+\begin{align*}
+\text{train} &= 2(38)=76,\\
+\text{room} &= 2(64)=128,\\
+\text{food} &\approx 2(35)=70,\\
+\text{total} &= \boxed{274}.
+\end{align*}
+Maybe reserve another 40 for transport.
+\cacographynote*{check return train}
+\crossout[line]{250 max} 314 with buffer.
+Museum tickets not counted yet!
+\end{document}

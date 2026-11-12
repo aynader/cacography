@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cacography"
+version = "0.14.0b1"
+description = "Typeset in LaTeX, get back a phone photo of handwritten notes."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE", "latex/LICENSE"]
+keywords = ["latex", "lualatex", "handwriting", "notes", "rendering"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Topic :: Text Processing :: Markup :: LaTeX",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering",
+]
+dependencies = [
+    "numpy>=1.26",
+    "pillow>=10",
+    "torch>=2.2",
+    # Traces the photo in 3D on an NVIDIA GPU; without one, pages are photographed with formulas.
+    "mitsuba>=3.5",
+]
+
+[project.scripts]
+cacography = "cacography_render.cli:main"
+cacography-render = "cacography_render.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/aynader/cacography"
+
+# The Python code lives in python/, the LaTeX package in latex/. The wheel carries the
+# LaTeX files too, so `cacography setup` can install them where TeX finds them.
+[tool.setuptools]
+packages = ["cacography_render", "cacography_render.tex"]
+
+[tool.setuptools.package-dir]
+cacography_render = "python/cacography_render"
+"cacography_render.tex" = "latex"
+
+[tool.setuptools.package-data]
+"cacography_render.tex" = ["*.sty", "*.lua"]

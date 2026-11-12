@@ -1,0 +1,15 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+% A starting point. Compile twice with LuaLaTeX and shell escape (the two lines above set
+% that up in TeXstudio), or run:  cacography notes.tex
+\documentclass{article}
+\usepackage[paper=notebook, ink=blue, sloppiness=0.5, seed=123]{cacography}
+\usepackage{amsmath}
+
+\begin{document}
+\section{Things I will definitely remember}
+The derivative of $\sin x$ is $\cos x$, and
+\[ \int_0^\pi \sin x \, dx = 2. \]
+\cacographynote{exam!}
+\crossout{Always} Usually check the units first.
+\end{document}
