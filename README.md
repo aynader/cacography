@@ -154,4 +154,4 @@ The full reference is the [manual](https://github.com/aynader/cacography/blob/ma
 
 ## Licence
 
-The LaTeX package is under the [LPPL 1.3c](https://github.com/aynader/cacography/blob/main/latex/LICENSE) and the rest of the code under [MIT](https://github.com/aynader/cacography/blob/main/LICENSE). The trained handwriting models are a separate download for **non-commercial research only**, because the datasets they learned from allow only that.
+The LaTeX package, the manual and the examples are under the [LPPL 1.3c](https://github.com/aynader/cacography/blob/main/latex/LICENSE), and the rest of the code under [MIT](https://github.com/aynader/cacography/blob/main/LICENSE); [`LICENSE`](https://github.com/aynader/cacography/blob/main/LICENSE) lists which file is which. The trained handwriting models are a separate download for **non-commercial research only**, because the datasets they learned from allow only that.

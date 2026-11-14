@@ -4,6 +4,10 @@
 -- position on the page. That scene is written as JSON with a hash. If the renderer has
 -- already drawn a page with the same hash, the drawing becomes the page and the typeset
 -- content stays as invisible text, so the PDF remains searchable.
+--
+-- Copyright (c) 2026 A. Nader. Part of cacography, under the LaTeX Project Public
+-- License 1.3c or later (https://www.latex-project.org/lppl.txt).
+-- Bug reports: https://github.com/aynader/cacography/issues
 
 cacography = cacography or {}
 local M = cacography

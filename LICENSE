@@ -1,10 +1,12 @@
 cacography is three things under three licences.
 
-1. The LaTeX package (latex/cacography.sty, latex/cacography.lua) is under the LaTeX
-   Project Public License, version 1.3c or later (latex/LICENSE).
+1. The LaTeX package is under the LaTeX Project Public License, version 1.3c or later
+   (latex/LICENSE). These files: everything in latex/, the manual
+   (docs/cacography-manual.tex and .pdf) and the example documents in examples/.
 
 2. Everything else in this repository (the renderer in python/, the training code in
-   training/, the tools and examples) is under the MIT License below.
+   training/, the tools in tools/, the installers and the README pictures) is under the
+   MIT License below.
 
 3. The trained handwriting models and the symbol bank are NOT in this repository and NOT
    under either licence. They are a separate download (cacography-models.zip) and may be
@@ -19,7 +21,7 @@ They are cached on your computer and not redistributed.
 
 MIT License
 
-Copyright (c) 2026 the cacography authors
+Copyright (c) 2026 A. Nader
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

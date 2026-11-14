@@ -8,7 +8,7 @@ version = "0.14.0b1"
 description = "Typeset in LaTeX, get back a phone photo of handwritten notes."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = "MIT AND LPPL-1.3c"
 license-files = ["LICENSE", "latex/LICENSE"]
 keywords = ["latex", "lualatex", "handwriting", "notes", "rendering"]
 classifiers = [

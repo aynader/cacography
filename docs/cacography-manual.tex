@@ -1,4 +1,8 @@
 % The cacography manual. Build with:  lualatex cacography-manual  (twice)
+%
+% Copyright (c) 2026 A. Nader. Part of cacography, under the LaTeX Project Public
+% License 1.3c or later (https://www.latex-project.org/lppl.txt).
+% Bug reports: https://github.com/aynader/cacography/issues
 \documentclass[11pt]{article}
 \usepackage[a4paper, margin=2.4cm]{geometry}
 \usepackage{fontspec}
@@ -16,7 +20,7 @@
 \setlength{\parskip}{0.55em}
 
 \title{\textbf{cacography}\\[0.3em]\large Typeset a document, get photographed handwritten notes back\\[0.2em]\normalsize Version 0.14 (beta)}
-\author{}
+\author{A. Nader\\\small\url{https://github.com/aynader/cacography}}
 \date{November 2026}
 
 \begin{document}
@@ -33,11 +37,15 @@ LaTeX still does the layout, the equations and the structure. A handwriting mode
 real pen recordings then writes every page, on procedurally made paper, which is photographed
 as a phone would: on a desk or on cloth, in a room's light, perhaps with a pen lying beside
 it. The PDF keeps the typeset text invisibly under each photo, so it stays searchable and
-copyable. Version 1.0 covers English and German.
+copyable. It covers English and German.
 
-\textbf{Licence.} The LaTeX package is under the LPPL 1.3c, the renderer under the MIT
-licence. The handwriting models are a separate download for non-commercial research only:
-they are trained on datasets (BRUSH, IAM-OnDB, MathWriting) whose terms allow only that.
+\textbf{Licence.} The LaTeX package (\texttt{cacography.sty}, \texttt{cacography.lua}),
+this manual and its examples are under the LPPL 1.3c or later; no file of the LaTeX
+package is under any other licence. Distributed separately, and not part of the LaTeX
+package: the Python renderer (MIT licence) and its handwriting models, which are for
+non-commercial research only because the datasets they were trained on (BRUSH,
+IAM-OnDB, MathWriting) allow only that. Bug reports:
+\url{https://github.com/aynader/cacography/issues}.
 
 \section{Installing}
 You need Lua\LaTeX\ (TeX Live or MiKTeX). Then, from a download of the repository:
