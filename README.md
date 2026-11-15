@@ -23,6 +23,8 @@ sh install.sh        # macOS, Linux
 
 The installer brings its own Python (via [uv](https://docs.astral.sh/uv)), installs the renderer, puts the LaTeX package where TeX finds it, fetches the handwriting models and runs `cacography doctor` to check everything. Allow for a few GB of download, mostly PyTorch. Already have PyTorch? Activate that environment first (`conda activate base`) and the installer uses it instead. An NVIDIA GPU is optional. Without one, pages are photographed with formulas instead of traced in 3D: no props, simpler light.
 
+The LaTeX package alone is also [on CTAN](https://ctan.org/pkg/cacography). If your TeX distribution already has it, the installer leaves it alone and only adds the renderer.
+
 ## Use
 
 ```bash
