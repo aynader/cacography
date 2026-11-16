@@ -22,6 +22,7 @@ from .camera import CAMERAS, photograph, studio
 from .page import PageWriter
 from .paper import PAPERS, make_sheet
 from .pen import Pen, subseed
+from .progress import MODES as PROGRESS_MODES, Progress
 from .symbols import SymbolBank
 
 def _models():
@@ -56,6 +57,8 @@ def main():
     ap.add_argument("--models", type=Path, default=MODELS)
     ap.add_argument("--all", action="store_true", help="redraw pages even when unchanged")
     ap.add_argument("--flat", action="store_true", help="photograph with formulas, not by tracing light in 3D")
+    ap.add_argument("--progress", choices=PROGRESS_MODES,
+                    help="a bar in a terminal, a window from an editor (auto); default: the document's progress option")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -108,15 +111,26 @@ def main():
     if writer.mess != 1.0:
         # Sloppiness away from 0.5 now loosens the layout too: those pages draw again.
         settings += f"|mess{writer.mess:.3f}"
-    drawn = 0
+    # Which pages changed: known before drawing, so the progress can count them.
+    plan = []
     for n in range(1, int(doc["pages"]) + 1):
         body = (folder / f"page-{n}.json").read_bytes()
         # LuaLaTeX swaps a drawing in only when its stamp matches the page's layout.
         stamp = hashlib.md5(body).hexdigest()
         made_with = hashlib.md5(f"{stamp}|{settings}".encode()).hexdigest()
         record = folder / f"page-{n}.drawn"
+        redraw = args.all or not record.exists() or record.read_text().strip() != made_with
+        plan.append((n, body, stamp, made_with, record, redraw))
+    progress = Progress(args.progress or doc.get("progress", "auto"), f"{args.jobname}.tex",
+                        [n for n, *_, redraw in plan if redraw])
+    pen.on_words = progress.words
+    drawn, stopped, done_pages = 0, False, set()
+    for n, body, stamp, made_with, record, redraw in plan:
         scene = json.loads(body)
-        if args.all or not record.exists() or record.read_text().strip() != made_with:
+        if redraw and progress.cancelled():
+            stopped = True
+        if redraw and not stopped:
+            progress.page(n)
             # A page's own settings (\cacographypage) on top of the document's.
             options = parse_options(scene.get("options", ""))
             try:
@@ -125,11 +139,13 @@ def main():
             except ValueError as e:
                 sys.exit(f"cacography: page {n}: {e}")
             ink, rules_from = writer.render(scene)
+            progress.sheet()
             sheet = make_sheet(paper, scene["width"], scene["height"], args.dpi, rules_from,
                                writer.spacing * writer.px, page_wear, page_aspects, n)
             sheet.erasures, sheet.rubbed = writer.erasures, writer.rubbed
             # One pen for the whole document: the same ink on every page.
             sheet.lay_ink(ink, doc["ink"], np.random.default_rng(subseed(seed, "ink")))
+            progress.photo()
             if traced:
                 photo, quality = render3d.photograph(sheet, room, page_aspects, n)
             else:
@@ -138,13 +154,23 @@ def main():
             (folder / f"page-{n}.stamp").write_text(stamp)
             record.write_text(made_with)
             drawn += 1
+            done_pages.add(n)
+            progress.page_done()
         else:
             # Still count this page's words, so later pages keep their seeds.
             writer.skip(scene)
+    progress.close()
+    # Which options each page is now up to date with (LuaLaTeX redraws a page whose differ).
+    if doc.get("fingerprint"):
+        for n, *_, redraw in plan:
+            if not (redraw and stopped and n not in done_pages):
+                (folder / f"page-{n}.options").write_text(doc["fingerprint"])
     pen.save()
     s = pen.stats
     print(f"drew {drawn} of {doc['pages']} pages in {time.time() - t0:.0f}s: {s['words']} words, {s['cached']} from cache,"
           f" {s['tries']} attempts, {s['failed']} never passed the checks")
+    if stopped:
+        print(f"cancelled: {sum(1 for *_, r in plan if r) - drawn} pages still to draw (they are drawn next time)")
     if writer.missing:
         print("not handwritten yet (drawn from the font):", " ".join(f"{c}x{n}" for c, n in sorted(writer.missing.items())))
     if not os.environ.get("CACOGRAPHY_BUILDING"):

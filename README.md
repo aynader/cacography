@@ -69,7 +69,7 @@ Or press Compile in your editor. Compile with LuaLaTeX and shell escape on, twic
 - **TeXworks, Texmaker, others:** add `-shell-escape` to the LuaLaTeX command.
 - **Overleaf:** no. The pages are drawn by a program on your computer.
 
-Start from [`examples/notes.tex`](https://github.com/aynader/cacography/blob/main/examples/notes.tex). Only pages that changed are drawn again.
+Start from [`examples/notes.tex`](https://github.com/aynader/cacography/blob/main/examples/notes.tex). Only pages that changed are drawn again. While they are, a small window shows how far it has got, with a Cancel button (a bar in a terminal; `progress=none` hides both).
 
 ## Options
 

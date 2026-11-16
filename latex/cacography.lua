@@ -470,7 +470,10 @@ local function on_shipout(box)
   end
   local stamp = read_file(base .. ".stamp")
   local drawing = base .. ".jpg"
-  if stamp and stamp:gsub("%s+", "") == hash and lfs.isfile(drawing) then
+  -- Missing when an older renderer drew the page: then only the layout counts.
+  local drawn_with = read_file(base .. ".options")
+  local same_options = not drawn_with or drawn_with:gsub("%s+", "") == M.fingerprint
+  if stamp and stamp:gsub("%s+", "") == hash and same_options and lfs.isfile(drawing) then
     hide_ink(box.list)
     place_drawing(box, drawing, ox, oy)
   else
@@ -497,6 +500,16 @@ function M.setup(opts)
   opts.rulespacing = RULE_SPACING[opts.paper] or RULE_SPACING.notebook
   token.set_macro("cacography@rulespacing", opts.rulespacing)
   M.dir = opts.jobname .. ".cacography"
+  -- The document's options, in one hash: a page drawn with other options is drawn again,
+  -- though its layout is the same (the renderer notes the hash it drew with in page-N.options).
+  local parts = {}
+  for k, v in pairs(opts) do
+    if k ~= "jobname" and k ~= "render" and k ~= "progress" then
+      parts[#parts + 1] = k .. "=" .. tostring(v)
+    end
+  end
+  table.sort(parts)
+  M.fingerprint = md5.sumhexa(table.concat(parts, ";"))
   if not lfs.isdir(M.dir) then
     lfs.mkdir(M.dir)
   end
@@ -543,6 +556,7 @@ function M.finish()
     doc[k] = v
   end
   doc.pages = M.page + 1 -- the page being finished is shipped after this call
+  doc.fingerprint = M.fingerprint
   write_file(M.dir .. "/document.json", json(doc))
 end
 

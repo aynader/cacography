@@ -9,7 +9,7 @@
 % License 1.3c or later (https://www.latex-project.org/lppl.txt).
 % Bug reports: https://github.com/aynader/cacography/issues
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{cacography}[2026/11/09 v0.14.0b1 Handwritten notes from LaTeX]
+\ProvidesPackage{cacography}[2026/11/16 v0.14.0b3 Handwritten notes from LaTeX]
 
 \RequirePackage{iftex}
 \RequirePackage{etoolbox}
@@ -45,6 +45,7 @@
   underline.store   = \cacography@underline,
   reroll.store      = \cacography@reroll,
   render.store      = \cacography@render,
+  progress.store    = \cacography@progress,
 }
 \SetKeys[cacography]{
   seed = random, paper = notebook, papersize = letter, handwriting = natural,
@@ -55,6 +56,9 @@
   stains = random, grooves = random, backside = random, curl = random, age = random, props = random, framing = random, underline = random, reroll = {},
   % auto: with --shell-escape, LuaLaTeX draws the pages itself; manual: run `cacography render`.
   render = auto,
+  % auto: a progress window while the pages are drawn from an editor, a bar in a terminal;
+  % window, bar, or none.
+  progress = auto,
 }
 \ProcessKeyOptions[cacography]
 
@@ -95,6 +99,7 @@
   underline   = "\luaescapestring{\cacography@underline}",
   reroll      = "\luaescapestring{\cacography@reroll}",
   render      = "\luaescapestring{\cacography@render}",
+  progress    = "\luaescapestring{\cacography@progress}",
 }}
 \AtEndDocument{\directlua{cacography.finish()}}
 % Read on every run, rewritten when new pages are drawn: tells latexmk to run again.

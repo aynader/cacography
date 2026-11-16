@@ -120,6 +120,7 @@ class Pen:
                 self.cache = {k: z[k] for k in z.files}
         self.used = set()
         self.stats = {"words": 0, "cached": 0, "tries": 0, "failed": 0}
+        self.on_words = None  # called with (words written, words on the page) as they come
 
     def _noise(self, key, attempt, steps):
         rng = np.random.default_rng(subseed(self.tag, key, attempt))
@@ -146,8 +147,14 @@ class Pen:
                 self.stats["cached"] += 1
             else:
                 todo.append((key, text, name))
+        done = len(requests) - len(todo)
+        if self.on_words:
+            self.on_words(done, len(requests))
         for start in range(0, len(todo), BATCH):
             self._write_batch(todo[start : start + BATCH], out)
+            done += len(todo[start : start + BATCH])
+            if self.on_words:
+                self.on_words(done, len(requests))
         self.stats["words"] += len(requests)
         return out
 

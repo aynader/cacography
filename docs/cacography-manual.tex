@@ -98,6 +98,10 @@ next to the document: it turns shell escape on and runs Lua\LaTeX\ again by itse
 shell escape the PDF shows the typeset text, and the log says what to run. The package option
 \opt{render=manual} never starts the renderer.
 
+While the pages are drawn from an editor, a small window shows how far it has got, with a
+Cancel button; in a terminal, a progress bar does. Cancelling keeps the pages already drawn,
+and the rest are drawn on the next run. \opt{progress=none} shows neither.
+
 \textbf{By hand}, the three steps are:
 \begin{lstlisting}
 lualatex notes             % lays out, records each page in notes.cacography/
@@ -127,6 +131,7 @@ one never reshuffles another.
 \opt{underline} & \opt{headings} (section titles underlined by hand), \opt{none}, \opt{random}\\
 \opt{camera} & \opt{phone}, \opt{scan} (a flatbed scan), \opt{none} (just the paper)\\
 \opt{render} & \opt{auto} (with shell escape, Lua\LaTeX\ draws the pages itself), \opt{manual}\\
+\opt{progress} & \opt{auto} (a window from an editor, a bar in a terminal), \opt{window}, \opt{bar}, \opt{none}\\
 \bottomrule
 \end{tabular}
 

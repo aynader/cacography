@@ -118,11 +118,14 @@ def setup(args):
         print("  -- no TeX distribution found (neither kpsewhich nor MiKTeX's initexmf is on PATH).\n"
               "     Install TeX Live or MiKTeX, open a new terminal, and run this again.")
         return 1
-    target = home / "tex" / "latex" / "cacography"
-    found = _kpse("cacography.sty")
+    # tex/lualatex, as on CTAN: LuaLaTeX looks there before tex/latex, so a newer copy here
+    # wins over the one a TeX distribution installed.
+    target = home / "tex" / "lualatex" / "cacography"
+    found = _kpse("-progname=lualatex", "cacography.sty")  # the copy LuaLaTeX would load
     shipped = _shipped_tex()
-    if target.is_symlink() or _is_junction(target):
-        print(f"  ok LaTeX package: {target} links to a source tree; left alone")
+    linked = [d for d in (target, home / "tex" / "latex" / "cacography") if d.is_symlink() or _is_junction(d)]
+    if linked:
+        print(f"  ok LaTeX package: {linked[0]} links to a source tree; left alone")
     elif found and not args.force and Path(found).resolve().parent != target.resolve() \
             and _sty_version(found) >= _sty_version(shipped / "cacography.sty"):
         print(f"  ok LaTeX package: TeX already has v{_sty_version(found)} ({found})")
@@ -206,7 +209,7 @@ def doctor(args=None):
     good &= _say(bool(lualatex), f"LuaLaTeX: {lualatex or 'not found'}",
                  "install TeX Live (tug.org/texlive) or MiKTeX (miktex.org)")
     if lualatex:
-        sty = _kpse("cacography.sty")
+        sty = _kpse("-progname=lualatex", "cacography.sty")
         good &= _say(bool(sty), f"LaTeX package: {sty or 'not found'}" + (f" (v{_sty_version(sty)})" if sty else ""),
                      "run: cacography setup")
         cfg = _kpse("cacography-config.lua")
