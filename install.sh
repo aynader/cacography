@@ -2,6 +2,7 @@
 # cacography installer for macOS and Linux.
 #
 #   From a download of this repository:   sh install.sh
+#   Without downloading anything:         curl -LsSf https://raw.githubusercontent.com/aynader/cacography/main/install.sh | sh
 #   With the models zip somewhere else:   sh install.sh --models /path/to/cacography-models.zip
 #   Into a Python that already has PyTorch (say, after `conda activate base`), nothing big
 #   is downloaded; it is used by itself when active, or name it:  sh install.sh --python /path/to/python
@@ -28,8 +29,9 @@ if ! command -v lualatex >/dev/null 2>&1; then
 fi
 
 # The renderer: from this folder when run from a download of the repository, else PyPI.
+# (Piped into sh, $0 is "sh" and "here" is wherever you are: then it must be this project.)
 here="$(cd "$(dirname "$0")" && pwd)"
-if [ -f "$here/pyproject.toml" ]; then source="$here"; else source="cacography"; fi
+if grep -qs '^name = "cacography"' "$here/pyproject.toml"; then source="$here"; else source="cacography"; fi
 
 # An active conda or virtual environment that has PyTorch already is used as it is.
 if [ -z "$python" ]; then

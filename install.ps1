@@ -1,6 +1,8 @@
 # cacography installer for Windows.
 #
 #   From a download of this repository:   .\install.ps1
+#   Or double-click install.cmd.
+#   Without downloading anything:         powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/aynader/cacography/main/install.ps1 | iex"
 #   With the models zip somewhere else:   .\install.ps1 -Models C:\path\cacography-models.zip
 #   Into a Python that already has PyTorch (say, after `conda activate base`), nothing big
 #   is downloaded; it is used by itself when active, or name it:  .\install.ps1 -Python C:\path\python.exe

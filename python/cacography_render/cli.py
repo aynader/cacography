@@ -80,6 +80,20 @@ def _miktex():
     return shutil.which("initexmf") is not None
 
 
+def _texmf_home():
+    """The user's own TeX folder (TEXMFHOME), or None when there is no TeX at all.
+
+    A fresh MiKTeX has no TEXMFHOME until the user registers a folder of their own, so
+    kpsewhich answers with nothing. Then ~/texmf is used; _refresh registers it with MiKTeX.
+    """
+    home = _kpse("-var-value", "TEXMFHOME")
+    if home:
+        return Path(home)
+    if _miktex():
+        return Path.home() / "texmf"
+    return None
+
+
 def _refresh(home):
     """Make TeX see new files under TEXMFHOME."""
     if _miktex():
@@ -99,11 +113,11 @@ def setup(args):
     ok = True
 
     # 1. The LaTeX package, unless TeX already has it (from CTAN, or a link to a source tree).
-    home = _kpse("-var-value", "TEXMFHOME")
-    if not home:
-        print("  -- no TeX distribution found (kpsewhich is missing). Install TeX Live or MiKTeX first.")
+    home = _texmf_home()
+    if home is None:
+        print("  -- no TeX distribution found (neither kpsewhich nor MiKTeX's initexmf is on PATH).\n"
+              "     Install TeX Live or MiKTeX, open a new terminal, and run this again.")
         return 1
-    home = Path(home)
     target = home / "tex" / "latex" / "cacography"
     found = _kpse("cacography.sty")
     shipped = _shipped_tex()

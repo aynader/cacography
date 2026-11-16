@@ -14,16 +14,43 @@ Every word is written by a handwriting model trained on real pen recordings. Eac
 
 ## Install
 
-You need LuaLaTeX ([TeX Live](https://tug.org/texlive) or [MiKTeX](https://miktex.org)). Then, from this folder:
+You need LuaLaTeX ([TeX Live](https://tug.org/texlive) or [MiKTeX](https://miktex.org)). Then pick one:
 
-```bash
-.\install.ps1        # Windows
-sh install.sh        # macOS, Linux
+**One click (Windows):** download this repository (Code → Download ZIP), unzip it and double-click `install.cmd`.
+
+**One line:**
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/aynader/cacography/main/install.ps1 | iex"
 ```
 
-The installer brings its own Python (via [uv](https://docs.astral.sh/uv)), installs the renderer, puts the LaTeX package where TeX finds it, fetches the handwriting models and runs `cacography doctor` to check everything. Allow for a few GB of download, mostly PyTorch. Already have PyTorch? Activate that environment first (`conda activate base`) and the installer uses it instead. An NVIDIA GPU is optional. Without one, pages are photographed with formulas instead of traced in 3D: no props, simpler light.
+```bash
+curl -LsSf https://raw.githubusercontent.com/aynader/cacography/main/install.sh | sh    # macOS, Linux
+```
 
-The LaTeX package alone is also [on CTAN](https://ctan.org/pkg/cacography). If your TeX distribution already has it, the installer leaves it alone and only adds the renderer.
+**From a clone**, it's `.\install.ps1` or `sh install.sh`. The installer brings its own Python (via [uv](https://docs.astral.sh/uv)), installs the renderer, puts the LaTeX package where TeX finds it, fetches the handwriting models and runs `cacography doctor` to check everything. Allow for a few GB of download, mostly PyTorch.
+
+**Already have PyTorch?** Activate that environment first and the installer uses it instead. An NVIDIA GPU is optional. Without one, pages are photographed with formulas instead of traced in 3D: no props, simpler light.
+
+**If you prefer to  do it yourself:** With uv, which makes the renderer its own environment and picks the PyTorch build for your GPU:
+
+```bash
+uv tool install --python 3.12 --torch-backend auto cacography
+cacography setup
+```
+
+Or into an environment of your own (conda, venv). pip installs PyTorch from PyPI if the environment has none; for a CUDA build, install PyTorch first [as pytorch.org says](https://pytorch.org/get-started/locally/).
+
+```bash
+conda create -n cacography python=3.12
+conda activate cacography
+pip install cacography
+cacography setup
+```
+
+Run `cacography setup` from the environment you'll use. It records that Python, so your editor starts it even when the environment isn't active. Changed environments? Run it again from the new one.
+
+The LaTeX package alone is also [on CTAN](https://ctan.org/pkg/cacography) and in MiKTeX. If your TeX distribution already has it, the installer leaves it alone and only adds the renderer.
 
 ## Use
 

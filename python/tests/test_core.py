@@ -215,6 +215,18 @@ class Command(unittest.TestCase):
         self.assertTrue((tex / "cacography.lua").is_file())
         self.assertRegex(cli._sty_version(tex / "cacography.sty"), r"^\d+\.\d+\.\d+")
 
+    def test_setup_uses_home_texmf_on_a_fresh_miktex(self):
+        from pathlib import Path
+        from unittest import mock
+        from cacography_render import cli
+        with mock.patch.object(cli, "_kpse", return_value=""):
+            with mock.patch.object(cli, "_miktex", return_value=True):
+                self.assertEqual(cli._texmf_home(), Path.home() / "texmf")  # fresh MiKTeX: no TEXMFHOME yet
+            with mock.patch.object(cli, "_miktex", return_value=False):
+                self.assertIsNone(cli._texmf_home())  # no TeX at all
+        with mock.patch.object(cli, "_kpse", return_value="/opt/texmf-home"):
+            self.assertEqual(cli._texmf_home(), Path("/opt/texmf-home"))
+
     def test_help_and_version_need_nothing_installed(self):
         from cacography_render import cli
         self.assertEqual(cli.main(["--help"]), 0)
